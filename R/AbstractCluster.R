@@ -10,7 +10,7 @@
 #'
 #' @export
 
-AbstractCluster <- function(dat, distance = 0.1, neighbors = 5) {
+AbstractCluster <- function(dat, distance = 1, neighbors = 5) {
 
   #Taking only numeric data
   dat <- dat %>%
@@ -32,6 +32,8 @@ AbstractCluster <- function(dat, distance = 0.1, neighbors = 5) {
   border_points <- c(0)
   dist <- c(0)
   iterations <- 0
+  cluster <- 1
+  cluster_assignment <- c(0)
 
   #1. Pick a random point
   #2. See what points are within distance declared in function
@@ -50,25 +52,13 @@ AbstractCluster <- function(dat, distance = 0.1, neighbors = 5) {
 
   }
 
-  #Test if distance if within distance declared by user
-  yo <- sapply(dist, neighbour_distance(dist, {{distance}}))
+  #Test if distance between points and center_point is within distance declared by user
+  core_points <- (dist < distance)
 
-  return(yo)
+  #If TRUE, then assign those observation's row value to the cluster #
+  cluster_assignment[core_points == TRUE] <- cluster
 
-}
-
-neighbour_distance <- function(calculated_distances, required_distance) {
-
-  if(calculated_distances <= required_distance) {
-
-    yes_or_no[i] <- TRUE
-
-  } else {
-
-    yes_or_no[i] <- TRUE
-
-  }
-
-  return(yes_or_no)
+  return(cluster_assignment)
 
 }
+
