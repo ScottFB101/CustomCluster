@@ -10,12 +10,13 @@
 #'
 #' @export
 
-AbstractCluster <- function(dat, distance = 1, neighbors = 5) {
+AbstractCluster <- function(dat, distance = 3, neighbors = 5) {
 
   #Taking only numeric data
   dat <- dat %>%
     select(. ,where(is.numeric)) %>%
-    mutate_all(scale)
+    mutate_all(scale) %>%
+    tibble::rowid_to_column("row_index")
 
   #Number of rows/observations
   num_obs <- nrow(dat)
@@ -24,9 +25,11 @@ AbstractCluster <- function(dat, distance = 1, neighbors = 5) {
   last_clusters <- c(0)
   border_points <- c(0)
   dist <- c(0)
+  cluster_assignment <- c(0)
+
+  #Counters
   iterations <- 0
   cluster <- 1
-  cluster_assignment <- c(0)
 
   #1. Pick a random point
   #2. See what points are within distance declared in function
@@ -34,14 +37,18 @@ AbstractCluster <- function(dat, distance = 1, neighbors = 5) {
   #4. For loop to check if the points just added in that cluster have enough "neighbor" points within that distance
   #5. If so, add them to cluster
 
-  #Original_data[sub_dat$row_index, "cluster"
+  #Original_data[sub_dat$row_index, "cluster"]
   #Keep sub-setting data throughout the loop
 
   repeat {
 
-    #Need to subset dat to remove points that have been selected
-    #Create a way to remember the row index, so we can reinsert cluster assignments to the correct observation
+    #If on second round of cluster assignment, then subset original dataframe to take out observations that have been assigned clusters
+    if(cluster > 1) {
 
+      dat <- dat[sub_dat$row_index, ]
+      num_obs <- nrow(dat)
+
+    }
 
     #Randomly select 1 observations
     random_obs <- sample(num_obs, size = 1)
@@ -70,10 +77,13 @@ AbstractCluster <- function(dat, distance = 1, neighbors = 5) {
     dat <- dat %>%
       cbind(cluster_assignment)
 
+    #Creating
+    browser()
+    sub_dat <- dat[is.na(dat$cluster_assignment), row_index]
+
     #Add one to cluster to indicate next iteration of clustering
     cluster <- cluster + 1
 
-    browser()
     #If all of the cluster assignment has been
     if(all(is.na(dat$cluster_assignment)) == TRUE) {
       break
