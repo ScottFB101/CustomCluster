@@ -23,13 +23,13 @@ AbstractCluster <- function(dat, distance = 0.1, neighbors = 5) {
   #Randomly select 1 observations
   random_obs <- sample(num_obs, size = 1)
 
-  #Create centers for reference
+  #Create starting center for reference
   starting_center <- slice(dat, random_obs)
 
   #Vectors of clusters
   clusters <- c(1)
   last_clusters <- c(0)
-  smallest_distances <- c(0)
+  border_points <- c(0)
   dist <- c(0)
   iterations <- 0
 
@@ -39,21 +39,36 @@ AbstractCluster <- function(dat, distance = 0.1, neighbors = 5) {
   #4. For loop to check if the points just added in that cluster have enough "neighbor" points within that distance
   #5. If so, add them to cluster
 
+  #Loop to calculate Euclidean distance of each point from the randomly selected centers
+  for(i in 1:num_obs) {
 
+    #Attaching observation to data frame of the randomly chosen center
+    center_and_point <- dat[i, ] %>% rbind(starting_center)
 
-
+    #Measuring Euclidean distance between observation and randomly chosen center
+    dist[i] <- dist(center_and_point, method = "euclidean", upper = FALSE)
 
   }
 
+  #Test if distance if within distance declared by user
+  yo <- sapply(dist, neighbour_distance(dist, {{distance}}))
+
+  return(yo)
 
 }
 
-neighbour_distance <- function(dat, k) {
+neighbour_distance <- function(calculated_distances, required_distance) {
 
+  if(calculated_distances <= required_distance) {
 
+    yes_or_no[i] <- TRUE
 
+  } else {
 
+    yes_or_no[i] <- TRUE
 
+  }
 
+  return(yes_or_no)
 
 }
