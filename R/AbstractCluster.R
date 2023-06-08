@@ -58,7 +58,17 @@ AbstractCluster <- function(dat, distance = 1, neighbors = 5) {
   #If TRUE, then assign those observation's row value to the cluster #
   cluster_assignment[core_points == TRUE] <- cluster
 
-  return(cluster_assignment)
+  #Add cluster assignments to original data set
+  dat <- dat %>%
+    cbind(cluster_assignment)
+
+  #Add one to cluster to indicate next iteration of clustering
+  cluster <- cluster + 1
+
+  return(dat)
 
 }
+
+#Original_data[sub_dat$row_index, "cluster"]
+#Keep subsetting data throughout the loop
 
