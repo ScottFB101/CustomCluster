@@ -1,7 +1,7 @@
 #' Implements
 #'
 #' @param dat A data set
-#' @param k The number of desired clusters
+#' @param distance The radius around a center point where the function will look for points to add to it's cluster
 #'
 #' @return Returns cluster assignments
 #'
@@ -10,7 +10,7 @@
 #'
 #' @export
 
-AbstractCluster <- function(dat, distance = 3, neighbors = 5) {
+AbstractCluster <- function(dat, distance = 10) {
 
   #Taking only numeric data
   dat <- dat %>%
@@ -25,14 +25,8 @@ AbstractCluster <- function(dat, distance = 3, neighbors = 5) {
   original_length <- nrow(dat)
   num_obs <- nrow(dat)
 
-  #Vectors of clusters
-  last_clusters <- c(0)
-  border_points <- c(0)
-
   #Counters
-  iterations <- 0
   cluster <- 1
-
 
   repeat {
 
