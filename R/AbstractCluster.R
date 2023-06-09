@@ -18,35 +18,30 @@ AbstractCluster <- function(dat, distance = 3, neighbors = 5) {
     mutate_all(scale) %>%
     tibble::rowid_to_column("row_index")
 
-  #Number of rows/observations
+  #Copying data set
+  final_dat <- dat
+
+  #Number of rows/observations for later check
+  original_length <- nrow(dat)
   num_obs <- nrow(dat)
 
   #Vectors of clusters
   last_clusters <- c(0)
   border_points <- c(0)
-  dist <- c(0)
-  cluster_assignment <- c(0)
 
   #Counters
   iterations <- 0
   cluster <- 1
 
-  #1. Pick a random point
-  #2. See what points are within distance declared in function
-  #3. Add them to the cluster based on being within that distance
-  #4. For loop to check if the points just added in that cluster have enough "neighbor" points within that distance
-  #5. If so, add them to cluster
-
-  #Original_data[sub_dat$row_index, "cluster"]
-  #Keep sub-setting data throughout the loop
 
   repeat {
 
     #If on second round of cluster assignment, then subset original dataframe to take out observations that have been assigned clusters
     if(cluster > 1) {
 
-      dat <- dat[sub_dat$row_index, ]
+      dat <- dat[!(dat$row_index %in% rows_to_exclude$row_index), ]
       num_obs <- nrow(dat)
+      row_indices <- dat$row_index
 
     }
 
@@ -55,6 +50,11 @@ AbstractCluster <- function(dat, distance = 3, neighbors = 5) {
 
     #Create starting center for reference
     starting_center <- slice(dat, random_obs)
+
+    #Reset distance and cluster_assignment vectors so they keep the right length
+    dist <- c(0)
+    cluster_assignment <- c(0)
+    core_points <- c(0)
 
     #Loop to calculate Euclidean distance of each point from the randomly selected centers
     for(i in 1:num_obs) {
@@ -73,24 +73,33 @@ AbstractCluster <- function(dat, distance = 3, neighbors = 5) {
     #If TRUE, then assign those observation's row value to the cluster
     cluster_assignment[core_points == TRUE] <- cluster
 
-    #Add cluster assignments to original data set
-    dat <- dat %>%
-      cbind(cluster_assignment)
+    #Add cluster assignments to final data set
+    if(cluster == 1) {
 
-    #Creating
-    browser()
-    sub_dat <- dat[is.na(dat$cluster_assignment), row_index]
+      final_dat$clusters <- cluster_assignment
+
+    } else {
+
+      final_dat <- final_dat %>%
+        mutate(clusters = replace(clusters, row_indices, cluster_assignment))
+
+    }
+
+    #Creating data frame of rows to exclude in next iteration
+    rows_to_exclude <- final_dat %>%
+      tidyr::drop_na() %>%
+      select(row_index)
 
     #Add one to cluster to indicate next iteration of clustering
     cluster <- cluster + 1
 
     #If all of the cluster assignment has been
-    if(all(is.na(dat$cluster_assignment)) == TRUE) {
+    if(nrow(dat) <= 1) {
       break
     }
 
   }
 
-  return(dat)
+  return(final_dat)
 
 }
