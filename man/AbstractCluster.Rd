@@ -4,12 +4,12 @@
 \alias{AbstractCluster}
 \title{Implements}
 \usage{
-AbstractCluster()
+AbstractCluster(dat, distance = 10)
 }
 \arguments{
 \item{dat}{A data set}
 
-\item{k}{The number of desired clusters}
+\item{distance}{The radius around a center point where the function will look for points to add to it's cluster}
 }
 \value{
 Returns cluster assignments
