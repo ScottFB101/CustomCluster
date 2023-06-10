@@ -2,6 +2,7 @@
 
 export("%>%")
 export(AbstractCluster)
+export(ClusterPlot)
 export(CreateElbowGraph)
 import(dplyr)
 import(ggplot2)

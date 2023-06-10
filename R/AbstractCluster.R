@@ -83,7 +83,7 @@ AbstractCluster <- function(dat, distance = 4) {
     #Creating data frame of rows to exclude in next iteration
     rows_to_exclude <- final_dat %>%
       tidyr::drop_na() %>%
-      select(row_index)
+      select(.data$row_index)
 
     #Add one to cluster to indicate next iteration of clustering
     cluster <- cluster + 1
@@ -98,6 +98,27 @@ AbstractCluster <- function(dat, distance = 4) {
   return(final_dat)
 
 }
+
+#' Cluster plot
+#'
+#' @param clusters Clusters from AbstractCluster
+#'
+#' @import dplyr
+#'
+#' @return plot
+#'
+#' @export
+
+ClusterPlot <- function(abstract_clusters) {
+  abstract_clusters %>%
+    mutate(clusters = as.numeric(clusters)) %>%
+    ggplot(aes(x = row_indices, y = clusters)) +
+    geom_point() +
+    theme_minimal() +
+    labs(title = "Clusters",
+         subtitle = "Distribution of clusters")
+}
+
 
 #' Creates an Elbow Method Graph to help the user manually choose # of clusters necessary for their k-means calculation.
 #'
