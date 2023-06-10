@@ -131,14 +131,14 @@ CreateElbowGraph <- function(dat, explanatory, response, kmax) {
   #within cluster sum of squares for each cluster combination until kmax
   wcss <- c()
 
-  for(i in 1:kmax) {
+  for(i in 2:kmax) { #cannot start at 1 when using the kmeanspp function
 
     #find cluster placements
-    clusters <- data.frame(kmeanspp(elbow_dat, i))
+    clusters <- data.frame(clusters = kmeanspp(elbow_dat, i))
 
     #create index values to help track the original values after clustering
     obs_num <- seq(nrow(dat))
-    clusters <- rbind(obs_num, clusters)
+    clusters <- cbind(obs_num, clusters)
 
     #split the df into k dfs each representing one cluster
     split_clust <- split(clusters, clusters$clusters)
@@ -156,16 +156,21 @@ CreateElbowGraph <- function(dat, explanatory, response, kmax) {
     wcss <- c(wcss, sum(cluster_ss))
   }
 
-  data.frame(wcss = wcss) |>
-    ggplot(aes(x = wcss)) +
+  wcss <- cbind(seq(from = 2, to = length(wcss) + 1), wcss)
+
+  colnames(wcss)[1] <- "Clusters"
+  colnames(wcss)[2] <- "WCSS"
+
+  data.frame(wcss) |>
+    ggplot(aes(x = Clusters, y = WCSS)) +
     geom_point() +
     geom_line()
 
 }
 
-#' Helper fucntion that grabs the original data values from the indices provided for each datapoin in every cluster
+#' Helper function for CreateElbowGraph that grabs the original data values from the indices provided for each datapoin in every cluster
 #'
-#' @param indices A data frame holding the indices of a cluster's points
+#' @param indices A vector holding the indices of a cluster's points
 #' @param elbow_dat Original data frame
 #' @param explanatory Explanatory variable of interest
 #' @param response Response variable of interest
@@ -175,16 +180,16 @@ CreateElbowGraph <- function(dat, explanatory, response, kmax) {
 getOriginalValues <- function(indices, elbow_dat, explanatory, response) {
 
   #merging the indices df with the original data so that each cluster df has correct values attributed to them
-  combined_cluster_og <- merge(indices, elbow_dat, by.x = "obs_num", by.y = "row.names", all.x = TRUE)
-  merged_df <- merged_df[, c({{explanatory}}, {{response}})]
+  combined_cluster_og <- merge(data.frame(obs_num = indices), elbow_dat, by.x = "obs_num", by.y = "row.names", all.x = TRUE)
+  og_values <- combined_cluster_og[, c(explanatory, response), drop = FALSE]
 
-  return(merged_df)
+  return(og_values)
 
 }
 
-#' Helper function that calculates the within cluster sum of squares
+#' Helper function for CreateElbowGraph that calculates the within cluster sum of squares
 #'
-#' @param clusters a dataframe that represents a cluster
+#' @param clusters a data frame that represents a cluster
 #'
 #' @return
 
@@ -203,12 +208,9 @@ getWCSS <- function(clusters) {
   #selecting just the distances from the centroid
   dist_vec <- as.numeric(distances[1:nrow(clusters)])
 
-  #squaring distances
-  dist_squared <- dist_vec^2
+  #squaring distances and summing to get the wcss
+  dist_squared_sum <- sum(dist_vec^2)
 
-  #summing to get the wcss
-  wcss <- sum(dist_squared)
-
-  return(wcss)
+  return(as.integer(dist_squared_sum))
 
 }
