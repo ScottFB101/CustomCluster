@@ -18,4 +18,5 @@ Imports:
     ggplot2,
     magrittr,
     maotai,
+    plotly,
     purrr
