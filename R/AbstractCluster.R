@@ -6,7 +6,7 @@
 #' @return Returns cluster assignments
 #'
 #' @import dplyr
-#' @importFrom dplyr mutate_all
+#' @importFrom dplyr select mutate_all
 #' @import stats
 #'
 #' @export
@@ -96,5 +96,122 @@ AbstractCluster <- function(dat, distance = 4) {
   }
 
   return(final_dat)
+
+}
+
+#' Creates an Elbow Method Graph to help the user manually choose # of clusters necessary for their k-means calculation.
+#'
+#' @param dat A data set
+#' @param explanatory explanatory variable of interest
+#' @param response response variable of interest
+#' @param kmax the maximum number of clusters the program should run and graph
+#'
+#' @import dplyr
+#' @import maotai
+#' @import purrr
+#' @import ggplot2
+#' @import plotly
+#'
+#' @return Elbow Method Graph
+#'
+#' @export
+CreateElbowGraph <- function(dat, explanatory, response, kmax) {
+
+  if(kmax > nrow(dat)) {
+    stop("The max number of clusters cannot exceed the number of observations in the datatable")
+  }
+
+  if(kmax <= 0) {
+    stop("The max number of clusters must be a positive, non-zero number that is less than, or equal to, the numbers of observations in the datatable")
+  }
+
+  elbow_dat <- dat |>
+    select({{explanatory}}, {{response}}) |>
+    as.matrix()
+
+  #within cluster sum of squares for each cluster combination until kmax
+  wcss <- c()
+
+  for(i in 2:kmax) { #cannot start at 1 when using the kmeanspp function
+
+    #find cluster placements
+    clusters <- data.frame(clusters = kmeanspp(elbow_dat, i))
+
+    #create index values to help track the original values after clustering
+    obs_num <- seq(nrow(dat))
+    clusters <- cbind(obs_num, clusters)
+
+    #split the df into k dfs each representing one cluster
+    split_clust <- split(clusters, clusters$clusters)
+
+    #call helper function to get original value of each datapoint in each cluster
+    og_values <- map(split_clust, ~ getOriginalValues(.x$obs_num,
+                                                      data.frame(elbow_dat),
+                                                      {{explanatory}},
+                                                      {{response}}))
+
+    #return within cluster SS for each cluster
+    cluster_ss <- map_int(og_values, ~getWCSS(.x))
+
+    #add this this cluster specification's wcss to the running wcss calc
+    wcss <- c(wcss, sum(cluster_ss))
+  }
+
+  #adding in index values to indicate the # of clusters used and changing column names
+  wcss <- cbind(seq(from = 2, to = length(wcss) + 1), wcss)
+
+  colnames(wcss)[1] <- "Clusters"
+  colnames(wcss)[2] <- "WCSS"
+
+  #graphing the elbow method
+  data.frame(wcss) |>
+    plot_ly(x = ~Clusters, y = ~WCSS, type = 'scatter', mode = 'lines+markers')
+
+}
+
+#' Helper function for CreateElbowGraph that grabs the original data values from the indices provided for each datapoin in every cluster
+#'
+#' @param indices A vector holding the indices of a cluster's points
+#' @param elbow_dat Original data frame
+#' @param explanatory Explanatory variable of interest
+#' @param response Response variable of interest
+#'
+#' @return A data frame that represents the true values of each point in a cluster
+
+getOriginalValues <- function(indices, elbow_dat, explanatory, response) {
+
+  #merging the indices df with the original data so that each cluster df has correct values attributed to them
+  combined_cluster_og <- merge(data.frame(obs_num = indices), elbow_dat, by.x = "obs_num", by.y = "row.names", all.x = TRUE)
+  og_values <- combined_cluster_og[, c(explanatory, response), drop = FALSE]
+
+  return(og_values)
+
+}
+
+#' Helper function for CreateElbowGraph that calculates the within cluster sum of squares
+#'
+#' @param clusters a data frame that represents a cluster
+#'
+#' @return integer describing a cluster's sum of squares from the centroid
+
+getWCSS <- function(clusters) {
+
+  #as per the structure of the dfs returned by getOriginalValues(...), the explanatory var will be in column 1 and reponse in column 2
+  centroid <- c(mean(clusters[[1]]), mean(clusters[[2]]))
+
+  #preparing df for distance calculation
+  clust_matrix <- as.matrix(clusters)
+  centroid_clust <- rbind(centroid, clust_matrix)
+
+  #euclidean distances matrix
+  distances <- dist(centroid_clust)
+
+  #selecting just the distances from the centroid
+  dist_vec <- as.numeric(distances[1:nrow(clusters)])
+
+  #squaring distances and summing to get the wcss
+  dist_squared_sum <- sum(dist_vec^2)
+
+  return(as.integer(dist_squared_sum))
 
 }

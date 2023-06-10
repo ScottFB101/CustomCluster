@@ -2,6 +2,13 @@
 
 export("%>%")
 export(AbstractCluster)
+export(CreateElbowGraph)
 import(dplyr)
+import(ggplot2)
+import(maotai)
+import(plotly)
+import(purrr)
 import(stats)
+importFrom(dplyr,mutate_all)
+importFrom(dplyr,select)
 importFrom(magrittr,"%>%")
