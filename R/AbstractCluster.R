@@ -85,6 +85,7 @@ neighbour_distance <- function(calculated_distances, required_distance) {
 #' @import dplyr
 #' @import maotai
 #' @import purrr
+#' @import ggplot2
 #'
 #' @export
 
@@ -103,7 +104,7 @@ CreateElbowGraph <- function(dat, explanatory, response, kmax) {
     as.matrix()
 
   #within cluster sum of squares for each cluster combination until kmax
-  wcss <- NA
+  wcss <- c()
 
   for(i in 1:kmax) {
 
@@ -126,10 +127,25 @@ CreateElbowGraph <- function(dat, explanatory, response, kmax) {
     #return within cluster SS for each cluster
     cluster_ss <- map_int(og_values, ~getWCSS(.x))
 
+    #add this this cluster specification's wcss to the running wcss calc
+    wcss <- c(wcss, sum(cluster_ss))
   }
 
+  data.frame(wcss = wcss) |>
+    ggplot(aes(x = wcss)) +
+    geom_point() +
+    geom_line()
 
 }
+
+#' Helper fucntion that grabs the original data values from the indices provided for each datapoin in every cluster
+#'
+#' @param indices A data frame holding the indices of a cluster's points
+#' @param elbow_dat Original data frame
+#' @param explanatory Explanatory variable of interest
+#' @param response Response variable of interest
+#'
+#' @return A data frame that represents the true values of each point in a cluster
 
 getOriginalValues <- function(indices, elbow_dat, explanatory, response) {
 
@@ -141,8 +157,33 @@ getOriginalValues <- function(indices, elbow_dat, explanatory, response) {
 
 }
 
-getWCSS <- function() {
+#' Helper function that calculates the within cluster sum of squares
+#'
+#' @param clusters a dataframe that represents a cluster
+#'
+#' @return
 
-  centroid <-
+getWCSS <- function(clusters) {
+
+  #as per the structure of the dfs returned by getOriginalValues(...), the explanatory var will be in column 1 and reponse in column 2
+  centroid <- c(mean(clusters[[1]]), mean(clusters[[2]]))
+
+  #preparing df for distance calculation
+  clust_matrix <- as.matrix(clusters)
+  centroid_clust <- rbind(centroid, clust_matrix)
+
+  #euclidean distances matrix
+  distances <- dist(centroid_clust)
+
+  #selecting just the distances from the centroid
+  dist_vec <- as.numeric(distances[1:nrow(clusters)])
+
+  #squaring distances
+  dist_squared <- dist_vec^2
+
+  #summing to get the wcss
+  wcss <- sum(dist_squared)
+
+  return(wcss)
 
 }

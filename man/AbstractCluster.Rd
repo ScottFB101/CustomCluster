@@ -4,7 +4,7 @@
 \alias{AbstractCluster}
 \title{Implements}
 \usage{
-AbstractCluster()
+AbstractCluster(dat, distance = 0.1, neighbors = 5)
 }
 \arguments{
 \item{dat}{A data set}
