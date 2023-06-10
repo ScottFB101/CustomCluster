@@ -72,3 +72,77 @@ neighbour_distance <- function(calculated_distances, required_distance) {
   return(yes_or_no)
 
 }
+
+
+#' Creates an Elbow Method Graph to help the user manually choose # of clusters necessary for their k-means calculation.
+#'
+#' @param dat A data set
+#' @param explanatory explanatory variable of interest
+#' @param response response variable of interest
+#'
+#' @return Elbow Method Graph
+#'
+#' @import dplyr
+#' @import maotai
+#' @import purrr
+#'
+#' @export
+
+CreateElbowGraph <- function(dat, explanatory, response, kmax) {
+
+  if(kmax > nrow(dat)) {
+    stop("The max number of clusters cannot exceed the number of observations in the datatable")
+  }
+
+  if(kmax <= 0) {
+    stop("The max number of clusters must be a positive, non-zero number that is less than, or equal to, the numbers of observations in the datatable")
+  }
+
+  elbow_dat <- dat |>
+    select({{explanatory}}, {{response}}) |>
+    as.matrix()
+
+  #within cluster sum of squares for each cluster combination until kmax
+  wcss <- NA
+
+  for(i in 1:kmax) {
+
+    #find cluster placements
+    clusters <- data.frame(kmeanspp(elbow_dat, i))
+
+    #create index values to help track the original values after clustering
+    obs_num <- seq(nrow(dat))
+    clusters <- rbind(obs_num, clusters)
+
+    #split the df into k dfs each representing one cluster
+    split_clust <- split(clusters, clusters$clusters)
+
+    #call helper function to get original value of each datapoint in each cluster
+    og_values <- map(split_clust, ~ getOriginalValues(.x$obs_num,
+                                                      data.frame(elbow_dat),
+                                                      {{explanatory}},
+                                                      {{response}}))
+
+    #return within cluster SS for each cluster
+    cluster_ss <- map_int(og_values, ~getWCSS(.x))
+
+  }
+
+
+}
+
+getOriginalValues <- function(indices, elbow_dat, explanatory, response) {
+
+  #merging the indices df with the original data so that each cluster df has correct values attributed to them
+  combined_cluster_og <- merge(indices, elbow_dat, by.x = "obs_num", by.y = "row.names", all.x = TRUE)
+  merged_df <- merged_df[, c({{explanatory}}, {{response}})]
+
+  return(merged_df)
+
+}
+
+getWCSS <- function() {
+
+  centroid <-
+
+}
