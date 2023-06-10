@@ -1,16 +1,17 @@
-#' Implements
+#' Forms clusters by picking a random observation and finding points that are within a specified distance to that center point
 #'
 #' @param dat A data set
 #' @param distance The radius around a center point where the function will look for points to add to it's cluster
 #'
 #' @return Returns cluster assignments
 #'
+#' @import dplyr
 #' @importFrom dplyr select mutate_all
 #' @import stats
 #'
 #' @export
 
-AbstractCluster <- function(dat, distance = 10) {
+AbstractCluster <- function(dat, distance = 4) {
 
   #Taking only numeric data
   dat <- dat %>%

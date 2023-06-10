@@ -1,0 +1,6 @@
+Description:
+
+The abstract clustering algorithm starts by taking a random observation from a data set, and a 
+designated distance from the user, then forms clusters by finding points within the designated distance
+from the random observation. After forming the first cluster, the algorithm continues to repeat this
+process until every observation in the data set has a assigned cluster.
