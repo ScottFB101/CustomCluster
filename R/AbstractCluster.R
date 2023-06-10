@@ -5,7 +5,7 @@
 #'
 #' @return Returns cluster assignments
 #'
-#' @import dplyr
+#' @importFrom dplyr select mutate_all
 #' @import stats
 #'
 #' @export
