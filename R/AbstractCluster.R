@@ -98,6 +98,27 @@ AbstractCluster <- function(dat, distance = 10) {
 
 }
 
+#' Cluster plot
+#'
+#' @param clusters Clusters from AbstractCluster
+#'
+#' @import dplyr
+#'
+#' @return plot
+#'
+#' @export
+
+ClusterPlot <- function(abstract_clusters) {
+  abstract_clusters %>%
+    mutate(clusters = as.numeric(clusters)) %>%
+    ggplot(aes(x = row_indices, y = clusters)) +
+    geom_point() +
+    theme_minimal() +
+    labs(title = "Clusters",
+         subtitle = "Distribution of clusters")
+}
+
+
 #' Creates an Elbow Method Graph to help the user manually choose # of clusters necessary for their k-means calculation.
 #'
 #' @param dat A data set
