@@ -12,6 +12,8 @@ CreateElbowGraph(dat, explanatory, response, kmax)
 \item{explanatory}{explanatory variable of interest}
 
 \item{response}{response variable of interest}
+
+\item{kmax}{the maximum number of clusters the program should run and graph}
 }
 \value{
 Elbow Method Graph

@@ -104,13 +104,14 @@ AbstractCluster <- function(dat, distance = 10) {
 #' @param dat A data set
 #' @param explanatory explanatory variable of interest
 #' @param response response variable of interest
-#'
-#' @return Elbow Method Graph
+#' @param kmax the maximum number of clusters the program should run and graph
 #'
 #' @import dplyr
 #' @import maotai
 #' @import purrr
 #' @import ggplot2
+#'
+#' @return Elbow Method Graph
 #'
 #' @export
 
@@ -191,7 +192,7 @@ getOriginalValues <- function(indices, elbow_dat, explanatory, response) {
 #'
 #' @param clusters a data frame that represents a cluster
 #'
-#' @return
+#' @return integer describing a cluster's sum of squares from the centroid
 
 getWCSS <- function(clusters) {
 

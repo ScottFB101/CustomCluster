@@ -2,13 +2,16 @@
 % Please edit documentation in R/AbstractCluster.R
 \name{getWCSS}
 \alias{getWCSS}
-\title{Helper function that calculates the within cluster sum of squares}
+\title{Helper function for CreateElbowGraph that calculates the within cluster sum of squares}
 \usage{
 getWCSS(clusters)
 }
 \arguments{
-\item{clusters}{a dataframe that represents a cluster}
+\item{clusters}{a data frame that represents a cluster}
+}
+\value{
+integer describing a cluster's sum of squares from the centroid
 }
 \description{
-Helper function that calculates the within cluster sum of squares
+Helper function for CreateElbowGraph that calculates the within cluster sum of squares
 }

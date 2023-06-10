@@ -2,12 +2,12 @@
 % Please edit documentation in R/AbstractCluster.R
 \name{getOriginalValues}
 \alias{getOriginalValues}
-\title{Helper fucntion that grabs the original data values from the indices provided for each datapoin in every cluster}
+\title{Helper function for CreateElbowGraph that grabs the original data values from the indices provided for each datapoin in every cluster}
 \usage{
 getOriginalValues(indices, elbow_dat, explanatory, response)
 }
 \arguments{
-\item{indices}{A data frame holding the indices of a cluster's points}
+\item{indices}{A vector holding the indices of a cluster's points}
 
 \item{elbow_dat}{Original data frame}
 
@@ -19,5 +19,5 @@ getOriginalValues(indices, elbow_dat, explanatory, response)
 A data frame that represents the true values of each point in a cluster
 }
 \description{
-Helper fucntion that grabs the original data values from the indices provided for each datapoin in every cluster
+Helper function for CreateElbowGraph that grabs the original data values from the indices provided for each datapoin in every cluster
 }
