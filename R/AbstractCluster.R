@@ -82,7 +82,7 @@ AbstractCluster <- function(dat, distance = 10) {
     #Creating data frame of rows to exclude in next iteration
     rows_to_exclude <- final_dat %>%
       tidyr::drop_na() %>%
-      select(row_index)
+      select(.data$row_index)
 
     #Add one to cluster to indicate next iteration of clustering
     cluster <- cluster + 1
