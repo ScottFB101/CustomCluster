@@ -98,7 +98,6 @@ AbstractCluster <- function(dat, distance = 10) {
 
 }
 
-
 #' Creates an Elbow Method Graph to help the user manually choose # of clusters necessary for their k-means calculation.
 #'
 #' @param dat A data set
@@ -110,11 +109,11 @@ AbstractCluster <- function(dat, distance = 10) {
 #' @import maotai
 #' @import purrr
 #' @import ggplot2
+#' @import plotly
 #'
 #' @return Elbow Method Graph
 #'
 #' @export
-
 CreateElbowGraph <- function(dat, explanatory, response, kmax) {
 
   if(kmax > nrow(dat)) {
@@ -157,15 +156,15 @@ CreateElbowGraph <- function(dat, explanatory, response, kmax) {
     wcss <- c(wcss, sum(cluster_ss))
   }
 
+  #adding in index values to indicate the # of clusters used and changing column names
   wcss <- cbind(seq(from = 2, to = length(wcss) + 1), wcss)
 
   colnames(wcss)[1] <- "Clusters"
   colnames(wcss)[2] <- "WCSS"
 
+  #graphing the elbow method
   data.frame(wcss) |>
-    ggplot(aes(x = Clusters, y = WCSS)) +
-    geom_point() +
-    geom_line()
+    plot_ly(x = ~Clusters, y = ~WCSS, type = 'scatter', mode = 'lines+markers')
 
 }
 
